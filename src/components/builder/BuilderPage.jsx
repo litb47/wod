@@ -1,14 +1,13 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Save, Share2, RotateCcw, ChevronLeft, ChevronRight, Clock, ChevronDown, Trash2, Plus } from 'lucide-react'
+import { motion, AnimatePresence, Reorder } from 'framer-motion'
+import { Save, Share2, RotateCcw, ChevronLeft, ChevronRight, Clock, Plus } from 'lucide-react'
 import { startOfDay, format, addDays, subDays } from 'date-fns'
 import { clsx } from 'clsx'
 import TypeSelector from './TypeSelector'
 import EmomConfig from './EmomConfig'
 import StimulusSelector from './StimulusSelector'
 import TimeDomainEstimator from './TimeDomainEstimator'
-import ExerciseSearch from './ExerciseSearch'
-import ExerciseList from './ExerciseList'
+import SectionBlock from './SectionBlock'
 import CustomExerciseModal from './CustomExerciseModal'
 import Button from '../shared/Button'
 
@@ -28,26 +27,21 @@ const SECTION_PRESETS = [
   { title: 'Cool-down', color: 'bg-sky-400' },
 ]
 
-const SECTION_COLOR_MAP = {
-  'Warm-up': 'bg-amber-400',
-  'Buy-In': 'bg-lime-400',
-  'Strength': 'bg-purple-400',
-  'Metcon': 'bg-orange-400',
-  'Accessory': 'bg-teal-400',
-  'Buy-Out': 'bg-rose-400',
-  'Cool-down': 'bg-sky-400',
-}
+/* ── Default session template ────────────────────────────────── */
 
-function getSectionColor(title) {
-  return SECTION_COLOR_MAP[title] || 'bg-white/40'
-}
+const DEFAULT_TEMPLATE = [
+  { title: 'Warm-up' },
+  { title: 'Strength' },
+  { title: 'Metcon' },
+  { title: 'Cool-down' },
+]
 
 /* ── Empty workout factory ───────────────────────────────────── */
 
 const emptyWorkout = (date) => ({
   type: 'For Time',
   date: startOfDay(new Date(date)).toISOString(),
-  sections: [{ id: generateKey(), title: 'Metcon', exercises: [] }],
+  sections: DEFAULT_TEMPLATE.map(t => ({ id: generateKey(), title: t.title, exercises: [] })),
   timeCap: '',
   notes: '',
   completed: false,
@@ -59,11 +53,18 @@ const emptyWorkout = (date) => ({
 
 function migrateToSections(raw) {
   if (raw.sections) {
-    return raw.sections.map(s => ({
-      id: s.id || generateKey(),
-      title: s.title || 'Workout',
-      exercises: (s.exercises || []).map(ex => ({ ...ex, _key: generateKey() })),
-    }))
+    return raw.sections.map(s => {
+      const section = {
+        id: s.id || generateKey(),
+        title: s.title || 'Workout',
+        exercises: (s.exercises || []).map(ex => ({ ...ex, _key: generateKey() })),
+      }
+      // Preserve section-level Hybrid fields if present
+      if (s.formatOverride) section.formatOverride = s.formatOverride
+      if (s.timeCap) section.timeCap = s.timeCap
+      if (s.emomConfig) section.emomConfig = s.emomConfig
+      return section
+    })
   }
   return [{
     id: generateKey(),
@@ -123,70 +124,6 @@ function BalanceBar({ exercises }) {
   )
 }
 
-/* ── Section Block ───────────────────────────────────────────── */
-
-function SectionBlock({ section, onAddExercise, onUpdateExercise, onRemoveExercise, onReorder, onDelete, workouts, onCreateCustom }) {
-  const [collapsed, setCollapsed] = useState(false)
-
-  return (
-    <div className="rounded-2xl bg-card/60 border border-white/[0.06] overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-        <div className={`w-[3px] h-4 rounded-full ${getSectionColor(section.title)}`} />
-        <span className="text-sm font-semibold text-white tracking-tight">{section.title}</span>
-        {section.exercises.length > 0 && (
-          <span className="text-[10px] text-white/30">{section.exercises.length}</span>
-        )}
-        <div className="flex-1" />
-        <motion.button
-          whileTap={{ scale: 0.85 }}
-          onClick={() => setCollapsed(c => !c)}
-          className="p-1.5 text-white/25 hover:text-white/50 transition-colors"
-        >
-          <ChevronDown
-            size={14}
-            className={clsx('transition-transform duration-200', collapsed && '-rotate-90')}
-          />
-        </motion.button>
-        <motion.button
-          whileTap={{ scale: 0.85 }}
-          onClick={onDelete}
-          className="p-1.5 text-white/20 hover:text-red-400 transition-colors"
-        >
-          <Trash2 size={14} />
-        </motion.button>
-      </div>
-
-      {/* Collapsible content */}
-      <AnimatePresence initial={false}>
-        {!collapsed && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="p-3 flex flex-col gap-3">
-              <ExerciseSearch
-                onSelect={(ex) => onAddExercise(section.id, ex)}
-                onCreateCustom={onCreateCustom}
-                workouts={workouts}
-              />
-              <ExerciseList
-                exercises={section.exercises}
-                onReorder={(newOrder) => onReorder(section.id, newOrder)}
-                onUpdate={(index, updated) => onUpdateExercise(section.id, index, updated)}
-                onRemove={(index) => onRemoveExercise(section.id, index)}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-
 /* ── Builder Page ────────────────────────────────────────────── */
 
 export default function BuilderPage({ addWorkout, onExport, preloadedWorkout, onClearPreload,
@@ -202,11 +139,27 @@ export default function BuilderPage({ addWorkout, onExport, preloadedWorkout, on
         stimulusIntent: preloadedWorkout.stimulusIntent || null,
       }
     }
+    // Check if a saved workout exists for this date
+    const dateStr = startOfDay(new Date(selectedDate)).toISOString()
+    const existing = workouts.find(w => startOfDay(new Date(w.date)).toISOString() === dateStr)
+    if (existing) {
+      return {
+        ...existing,
+        timeCap: existing.timeCap || '',
+        sections: migrateToSections(existing),
+        emomConfig: existing.emomConfig || null,
+        stimulusIntent: existing.stimulusIntent || null,
+      }
+    }
     return emptyWorkout(selectedDate)
   })
 
   const [showCustomModal, setShowCustomModal] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [saved, setSaved] = useState(() => {
+    if (preloadedWorkout) return false
+    const dateStr = startOfDay(new Date(selectedDate)).toISOString()
+    return workouts.some(w => startOfDay(new Date(w.date)).toISOString() === dateStr)
+  })
   const prevPreload = useRef(preloadedWorkout)
   const prevDateRef = useRef(startOfDay(new Date(selectedDate)).toISOString())
   const customModalSectionRef = useRef(null)
@@ -261,14 +214,41 @@ export default function BuilderPage({ addWorkout, onExport, preloadedWorkout, on
   /* ── Global handlers ────────────────────────────────────── */
 
   const handleTypeChange = (type) => {
-    setWorkout(w => ({
-      ...w,
-      type,
-      timeCap: '',
-      emomConfig: type === 'EMOM' ? (w.emomConfig || { interval: 2, rounds: 10, pattern: 'same' }) : null,
-    }))
+    setWorkout(w => {
+      const update = {
+        ...w,
+        type,
+        timeCap: '',
+        emomConfig: type === 'EMOM' ? (w.emomConfig || { interval: 2, rounds: 10, pattern: 'same' }) : null,
+      }
+      // When switching away from Hybrid, strip section-level overrides
+      if (type !== 'Hybrid' && w.type === 'Hybrid') {
+        update.sections = w.sections.map(({ formatOverride, timeCap, emomConfig, ...rest }) => rest)
+      }
+      // When switching TO Hybrid, apply smart defaults to template sections
+      if (type === 'Hybrid' && w.type !== 'Hybrid') {
+        update.sections = w.sections.map(s => {
+          if (s.title === 'Strength') return { ...s, formatOverride: 'Sets' }
+          if (s.title === 'Metcon') return { ...s, formatOverride: 'AMRAP', timeCap: '12:00' }
+          return s
+        })
+      }
+      return update
+    })
     setSaved(false)
   }
+
+  /* ── Section-level field updates (Hybrid) ────────────────── */
+
+  const handleUpdateSection = useCallback((sectionId, updates) => {
+    setWorkout(w => ({
+      ...w,
+      sections: w.sections.map(s =>
+        s.id === sectionId ? { ...s, ...updates } : s
+      ),
+    }))
+    setSaved(false)
+  }, [])
 
   /* ── Section-scoped exercise handlers ───────────────────── */
 
@@ -328,6 +308,11 @@ export default function BuilderPage({ addWorkout, onExport, preloadedWorkout, on
     setSaved(false)
   }
 
+  const handleSectionReorder = useCallback((newOrder) => {
+    setWorkout(w => ({ ...w, sections: newOrder }))
+    setSaved(false)
+  }, [])
+
   const handleRemoveSection = (sectionId) => {
     const section = workout.sections.find(s => s.id === sectionId)
     if (section?.exercises.length > 0 && !window.confirm(`Delete "${section.title}" section with ${section.exercises.length} exercise(s)?`)) return
@@ -342,10 +327,25 @@ export default function BuilderPage({ addWorkout, onExport, preloadedWorkout, on
 
   const handleSave = () => {
     if (!hasExercises) return
-    const cleanSections = workout.sections.map(s => ({
-      ...s,
-      exercises: s.exercises.map(({ _key, ...rest }) => rest),
-    }))
+    const isHybrid = workout.type === 'Hybrid'
+    const cleanSections = workout.sections.map(s => {
+      const section = {
+        ...s,
+        exercises: s.exercises.map(({ _key, ...rest }) => rest),
+      }
+      // Strip section-level override fields for non-Hybrid workouts
+      if (!isHybrid) {
+        delete section.formatOverride
+        delete section.timeCap
+        delete section.emomConfig
+      } else {
+        // For Hybrid: clean up empty/null section fields
+        if (!section.formatOverride) delete section.formatOverride
+        if (!section.timeCap) delete section.timeCap
+        if (!section.emomConfig) delete section.emomConfig
+      }
+      return section
+    })
     const toSave = {
       ...workout,
       sections: cleanSections,
@@ -391,9 +391,11 @@ export default function BuilderPage({ addWorkout, onExport, preloadedWorkout, on
 
   /* ── Render ─────────────────────────────────────────────── */
 
+  const isHybrid = workout.type === 'Hybrid'
   const timeLabel = workout.type === 'For Time' ? 'Time Cap' : 'Duration'
   const timePlaceholder = workout.type === 'For Time' ? '15:00' : '12 min'
-  const showTimeInput = workout.type !== 'Strength' && workout.type !== 'EMOM'
+  const showTimeInput = !isHybrid && workout.type !== 'Strength' && workout.type !== 'EMOM'
+  const showEmomConfig = workout.type === 'EMOM'
   const isTimeCapValid = !workout.timeCap || /^\d+([:.]\d{0,2})?\s*(min|m)?$/.test(workout.timeCap.trim())
 
   return (
@@ -428,8 +430,8 @@ export default function BuilderPage({ addWorkout, onExport, preloadedWorkout, on
       {/* Type Selector */}
       <TypeSelector value={workout.type} onChange={handleTypeChange} />
 
-      {/* EMOM Config */}
-      {workout.type === 'EMOM' && (
+      {/* EMOM Config (workout-level, non-Hybrid only) */}
+      {showEmomConfig && (
         <EmomConfig
           config={workout.emomConfig}
           onChange={(emomConfig) => {
@@ -479,7 +481,7 @@ export default function BuilderPage({ addWorkout, onExport, preloadedWorkout, on
       <TimeDomainEstimator exercises={allExercises} stimulusIntent={workout.stimulusIntent} />
 
       {/* Workout Sections */}
-      <div className="flex flex-col gap-4">
+      <Reorder.Group axis="y" values={workout.sections} onReorder={handleSectionReorder} className="flex flex-col gap-4">
         {workout.sections.map(section => (
           <SectionBlock
             key={section.id}
@@ -494,9 +496,11 @@ export default function BuilderPage({ addWorkout, onExport, preloadedWorkout, on
               customModalSectionRef.current = section.id
               setShowCustomModal(true)
             }}
+            workoutType={workout.type}
+            onUpdateSection={handleUpdateSection}
           />
         ))}
-      </div>
+      </Reorder.Group>
 
       {/* Add Section Chips */}
       {availablePresets.length > 0 && (

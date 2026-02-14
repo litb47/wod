@@ -8,6 +8,7 @@ const typeColors = {
   'For Time': 'text-orange-400',
   EMOM: 'text-cyan-400',
   Strength: 'text-purple-400',
+  Hybrid: 'text-pink-400',
 }
 
 export default function DayCard({ date, workouts, isSelected, onClick, hasWorkout }) {

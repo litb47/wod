@@ -26,7 +26,7 @@ export const exercises = [
   { id: 'w22', name: 'Snatch Pull', modality: 'W', defaultReps: 3, defaultSets: 4, defaultWeight: '75 kg', aliases: ['sn pull'] },
 
   // ═══════════════════════════════════════════════════════
-  // GYMNASTICS (G) — 26 exercises
+  // GYMNASTICS (G) — 29 exercises
   // ═══════════════════════════════════════════════════════
   { id: 'g01', name: 'Strict Pull-ups', modality: 'G', defaultReps: 10, defaultSets: 3, defaultWeight: 'BW', aliases: ['strict pu', 'pull-ups strict'] },
   { id: 'g02', name: 'Kipping Pull-ups', modality: 'G', defaultReps: 15, defaultSets: 3, defaultWeight: 'BW', aliases: ['kipping pu', 'pull-ups'] },
@@ -54,6 +54,9 @@ export const exercises = [
   { id: 'g24', name: 'Hollow Rocks', modality: 'G', defaultReps: 20, defaultSets: 3, defaultWeight: 'BW', aliases: ['hollow rock', 'hollows'] },
   { id: 'g25', name: 'Ring Rows', modality: 'G', defaultReps: 12, defaultSets: 3, defaultWeight: 'BW', aliases: ['ring row', 'inverted rows'] },
   { id: 'g26', name: 'Deficit HSPU', modality: 'G', defaultReps: 5, defaultSets: 5, defaultWeight: 'BW', aliases: ['deficit handstand push-ups', 'deficit hspu'] },
+  { id: 'g27', name: 'Push-ups', modality: 'G', defaultReps: 20, defaultSets: 3, defaultWeight: 'BW', aliases: ['push-up', 'pushups', 'pushup', 'press-ups'] },
+  { id: 'g28', name: 'Air Squats', modality: 'G', defaultReps: 20, defaultSets: 3, defaultWeight: 'BW', aliases: ['air squat', 'bodyweight squat', 'bw squat', 'squats'] },
+  { id: 'g29', name: 'Box Step-ups', modality: 'G', defaultReps: 20, defaultSets: 3, defaultWeight: '20"', aliases: ['step-ups', 'step ups', 'box step up', 'step-up'] },
 
   // ═══════════════════════════════════════════════════════
   // MONOSTRUCTURAL (M) — 13 exercises

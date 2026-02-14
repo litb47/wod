@@ -32,6 +32,7 @@ export default function CustomExerciseModal({ isOpen, onClose, onCreated }) {
     }
     saveCustomExercise(exercise)
     onCreated?.({
+      exerciseId: exercise.id,
       name: exercise.name,
       modality: exercise.modality,
       sets: exercise.defaultSets,

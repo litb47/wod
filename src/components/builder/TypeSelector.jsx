@@ -1,13 +1,14 @@
 import { motion } from 'framer-motion'
 import { clsx } from 'clsx'
 
-const TYPES = ['AMRAP', 'For Time', 'EMOM', 'Strength']
+const TYPES = ['AMRAP', 'For Time', 'EMOM', 'Strength', 'Hybrid']
 
 const typeColors = {
   AMRAP: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
   'For Time': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
   EMOM: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
   Strength: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  Hybrid: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
 }
 
 export default function TypeSelector({ value, onChange }) {

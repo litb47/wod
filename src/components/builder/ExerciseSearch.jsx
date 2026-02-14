@@ -6,7 +6,7 @@ import { searchExercises } from '../../data/exercises'
 import { getCustomExercises } from '../../services/storageService'
 import ModalityBadge from '../shared/ModalityBadge'
 
-function getRecentUsage(exerciseName, workouts) {
+function getRecentUsage(exerciseId, exerciseName, workouts) {
   const today = startOfDay(new Date())
   const sevenDaysAgo = subDays(today, 7)
   for (const workout of workouts) {
@@ -16,7 +16,11 @@ function getRecentUsage(exerciseName, workouts) {
     const allExercises = workout.sections
       ? workout.sections.flatMap(s => s.exercises || [])
       : (workout.exercises || [])
-    const match = allExercises.find(ex => ex.name.toLowerCase() === exerciseName.toLowerCase())
+    const match = allExercises.find(ex =>
+      exerciseId && ex.exerciseId
+        ? ex.exerciseId === exerciseId
+        : ex.name.toLowerCase() === exerciseName.toLowerCase()
+    )
     if (match) {
       const wm = match.weightMale ?? match.weight ?? ''
       const wf = match.weightFemale ?? match.weight ?? ''
@@ -40,6 +44,7 @@ export default function ExerciseSearch({ onSelect, onCreateCustom, workouts = []
     const wm = exercise.defaultWeightMale ?? exercise.defaultWeight
     const wf = exercise.defaultWeightFemale ?? exercise.defaultWeight
     onSelect({
+      exerciseId: exercise.id,
       name: exercise.name,
       modality: exercise.modality,
       sets: exercise.defaultSets,
@@ -77,7 +82,7 @@ export default function ExerciseSearch({ onSelect, onCreateCustom, workouts = []
             className="absolute left-0 right-0 top-full z-40 mt-1 max-h-64 overflow-y-auto rounded-xl bg-card border border-white/10 shadow-2xl origin-top"
           >
             {results.map((ex) => {
-              const recentUsage = getRecentUsage(ex.name, workouts)
+              const recentUsage = getRecentUsage(ex.id, ex.name, workouts)
               return (
                 <div key={ex.id}>
                   <button
