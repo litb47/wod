@@ -4,9 +4,9 @@ import ExerciseRow from './ExerciseRow'
 export default function ExerciseList({ exercises, onReorder, onUpdate, onRemove }) {
   if (exercises.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center">
-        <p className="text-sm text-white/30">
-          Search and add exercises above
+      <div className="rounded-xl border border-dashed border-white/[0.08] py-5 text-center">
+        <p className="text-xs text-white/25">
+          No exercises yet
         </p>
       </div>
     )

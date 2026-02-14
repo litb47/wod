@@ -26,7 +26,7 @@ export const exercises = [
   { id: 'w22', name: 'Snatch Pull', modality: 'W', defaultReps: 3, defaultSets: 4, defaultWeight: '75 kg', aliases: ['sn pull'] },
 
   // ═══════════════════════════════════════════════════════
-  // GYMNASTICS (G) — 25 exercises
+  // GYMNASTICS (G) — 26 exercises
   // ═══════════════════════════════════════════════════════
   { id: 'g01', name: 'Strict Pull-ups', modality: 'G', defaultReps: 10, defaultSets: 3, defaultWeight: 'BW', aliases: ['strict pu', 'pull-ups strict'] },
   { id: 'g02', name: 'Kipping Pull-ups', modality: 'G', defaultReps: 15, defaultSets: 3, defaultWeight: 'BW', aliases: ['kipping pu', 'pull-ups'] },
@@ -53,9 +53,10 @@ export const exercises = [
   { id: 'g23', name: 'Knees-to-Elbows', modality: 'G', defaultReps: 12, defaultSets: 3, defaultWeight: 'BW', aliases: ['k2e', 'kte', 'knees to elbows'] },
   { id: 'g24', name: 'Hollow Rocks', modality: 'G', defaultReps: 20, defaultSets: 3, defaultWeight: 'BW', aliases: ['hollow rock', 'hollows'] },
   { id: 'g25', name: 'Ring Rows', modality: 'G', defaultReps: 12, defaultSets: 3, defaultWeight: 'BW', aliases: ['ring row', 'inverted rows'] },
+  { id: 'g26', name: 'Deficit HSPU', modality: 'G', defaultReps: 5, defaultSets: 5, defaultWeight: 'BW', aliases: ['deficit handstand push-ups', 'deficit hspu'] },
 
   // ═══════════════════════════════════════════════════════
-  // MONOSTRUCTURAL (M) — 12 exercises
+  // MONOSTRUCTURAL (M) — 13 exercises
   // ═══════════════════════════════════════════════════════
   { id: 'm01', name: 'Run', modality: 'M', defaultReps: 400, defaultSets: 1, defaultWeight: 'm', aliases: ['running', 'sprint'] },
   { id: 'm02', name: 'Row (Calories)', modality: 'M', defaultReps: 20, defaultSets: 1, defaultWeight: 'cal', aliases: ['row cal', 'rowing cal', 'erg cal'] },
@@ -69,6 +70,7 @@ export const exercises = [
   { id: 'm10', name: 'Shuttle Run', modality: 'M', defaultReps: 25, defaultSets: 4, defaultWeight: 'm', aliases: ['shuttle'] },
   { id: 'm11', name: 'Run (Mile)', modality: 'M', defaultReps: 1, defaultSets: 1, defaultWeight: 'mile', aliases: ['mile run', '1 mile'] },
   { id: 'm12', name: 'Ski Erg (Meters)', modality: 'M', defaultReps: 500, defaultSets: 1, defaultWeight: 'm', aliases: ['ski m', 'ski meters'] },
+  { id: 'm13', name: 'Bike Erg (Meters)', modality: 'M', defaultReps: 1000, defaultSets: 1, defaultWeight: 'm', aliases: ['bike m', 'bike meters', 'bike erg m'] },
 ]
 
 export function searchExercises(query, customExercises = []) {

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
+import { startOfDay } from 'date-fns'
 import Header from './components/layout/Header'
 import BottomNav from './components/layout/BottomNav'
 import DashboardPage from './components/dashboard/DashboardPage'
@@ -7,17 +8,19 @@ import BuilderPage from './components/builder/BuilderPage'
 import BenchmarksPage from './components/benchmarks/BenchmarksPage'
 import ExportModal from './components/export/ExportModal'
 import { useWorkouts } from './hooks/useWorkouts'
-import { initializeWithSeedData } from './services/storageService'
-
-// Seed data synchronously before first render so useWorkouts picks it up
-initializeWithSeedData()
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [exportWorkout, setExportWorkout] = useState(null)
   const [preloadedWorkout, setPreloadedWorkout] = useState(null)
+  const [selectedDate, setSelectedDate] = useState(() => startOfDay(new Date()))
 
   const { workouts, addWorkout, updateWorkout, deleteWorkout, toggleComplete, getWorkoutForDate } = useWorkouts()
+
+  const handlePlanWorkout = (date) => {
+    setSelectedDate(startOfDay(new Date(date)))
+    setActiveTab('builder')
+  }
 
   const handleLoadToBuilder = (benchmarkWod) => {
     setPreloadedWorkout({
@@ -45,6 +48,9 @@ export default function App() {
               workouts={workouts}
               getWorkoutForDate={getWorkoutForDate}
               toggleComplete={toggleComplete}
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+              onPlanWorkout={handlePlanWorkout}
             />
           )}
           {activeTab === 'builder' && (
@@ -54,6 +60,9 @@ export default function App() {
               onExport={handleExport}
               preloadedWorkout={preloadedWorkout}
               onClearPreload={() => setPreloadedWorkout(null)}
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+              workouts={workouts}
             />
           )}
           {activeTab === 'benchmarks' && (

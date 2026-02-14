@@ -10,7 +10,7 @@ const typeColors = {
   Strength: 'text-purple-400',
 }
 
-export default function DayCard({ date, workouts, isSelected, onClick }) {
+export default function DayCard({ date, workouts, isSelected, onClick, hasWorkout }) {
   const today = isToday(date)
   const hasWorkouts = workouts.length > 0
   const allCompleted = hasWorkouts && workouts.every(w => w.completed)
@@ -20,9 +20,9 @@ export default function DayCard({ date, workouts, isSelected, onClick }) {
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
       className={clsx(
-        'flex flex-col items-center rounded-2xl px-4 py-3 min-w-[72px] transition-colors',
+        'flex flex-col items-center rounded-2xl px-4 py-3 w-[72px] flex-shrink-0 transition-colors',
         isSelected
-          ? 'bg-accent/20 border border-accent/50'
+          ? 'bg-accent/20 border border-accent/50 ring-1 ring-accent shadow-[0_0_12px_rgba(var(--color-accent-rgb,168,85,247),0.35)]'
           : 'bg-card border border-transparent',
         today && !isSelected && 'border-white/10',
       )}
@@ -37,8 +37,18 @@ export default function DayCard({ date, workouts, isSelected, onClick }) {
         {format(date, 'd')}
       </span>
 
+      {/* Workout dot indicator */}
+      <div className="mt-1 h-1.5 flex items-center">
+        {hasWorkout && (
+          <div className={clsx(
+            'w-1.5 h-1.5 rounded-full',
+            allCompleted ? 'bg-green-400' : 'bg-accent',
+          )} />
+        )}
+      </div>
+
       {hasWorkouts ? (
-        <div className="mt-1.5 flex flex-col items-center gap-0.5">
+        <div className="mt-0.5 flex flex-col items-center gap-0.5">
           {workouts.slice(0, 1).map(w => (
             <span key={w.id} className={clsx('text-[10px] font-medium', typeColors[w.type])}>
               {w.type}
@@ -49,7 +59,7 @@ export default function DayCard({ date, workouts, isSelected, onClick }) {
           )}
         </div>
       ) : (
-        <div className="mt-1.5 h-5 flex items-center">
+        <div className="mt-0.5 h-5 flex items-center">
           <span className="text-[10px] text-white/20">Rest</span>
         </div>
       )}

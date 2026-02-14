@@ -10,6 +10,18 @@ export default function ExerciseRow({ exercise, index, onUpdate, onRemove }) {
     onUpdate(index, { ...exercise, [field]: value })
   }
 
+  // Backward compat: read legacy `weight` into male slot if new fields missing
+  const maleWeight = exercise.weightMale ?? exercise.weight ?? ''
+  const femaleWeight = exercise.weightFemale ?? exercise.weight ?? ''
+
+  const handleMaleChange = (value) => {
+    onUpdate(index, { ...exercise, weightMale: value, weightFemale: exercise.weightFemale ?? femaleWeight })
+  }
+
+  const handleFemaleChange = (value) => {
+    onUpdate(index, { ...exercise, weightMale: exercise.weightMale ?? maleWeight, weightFemale: value })
+  }
+
   return (
     <Reorder.Item
       value={exercise}
@@ -62,13 +74,26 @@ export default function ExerciseRow({ exercise, index, onUpdate, onRemove }) {
             />
             <span className="text-[10px] text-white/30">reps</span>
           </div>
-          <input
-            type="text"
-            value={exercise.weight}
-            onChange={(e) => handleFieldChange('weight', e.target.value)}
-            className="w-16 rounded-md bg-white/5 px-1.5 py-0.5 text-xs text-white text-center outline-none border border-transparent focus:border-white/20"
-            placeholder="weight"
-          />
+          {/* Dual weight inputs */}
+          <div className="flex items-center gap-0.5">
+            <input
+              type="text"
+              value={maleWeight}
+              onChange={(e) => handleMaleChange(e.target.value)}
+              className="w-14 rounded-md bg-white/5 px-1 py-0.5 text-xs text-white text-center outline-none border border-transparent focus:border-blue-400/30"
+              placeholder="M"
+              title="Male Rx"
+            />
+            <span className="text-[10px] text-white/20">/</span>
+            <input
+              type="text"
+              value={femaleWeight}
+              onChange={(e) => handleFemaleChange(e.target.value)}
+              className="w-14 rounded-md bg-white/5 px-1 py-0.5 text-xs text-white text-center outline-none border border-transparent focus:border-pink-400/30"
+              placeholder="W"
+              title="Female Rx"
+            />
+          </div>
         </div>
       </div>
 

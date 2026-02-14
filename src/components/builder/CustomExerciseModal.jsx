@@ -14,7 +14,8 @@ export default function CustomExerciseModal({ isOpen, onClose, onCreated }) {
   const [modality, setModality] = useState('G')
   const [defaultReps, setDefaultReps] = useState(10)
   const [defaultSets, setDefaultSets] = useState(3)
-  const [defaultWeight, setDefaultWeight] = useState('BW')
+  const [defaultWeightMale, setDefaultWeightMale] = useState('BW')
+  const [defaultWeightFemale, setDefaultWeightFemale] = useState('BW')
 
   const handleSave = () => {
     if (!name.trim()) return
@@ -24,16 +25,26 @@ export default function CustomExerciseModal({ isOpen, onClose, onCreated }) {
       modality,
       defaultReps,
       defaultSets,
-      defaultWeight,
+      defaultWeight: defaultWeightMale,
+      defaultWeightMale,
+      defaultWeightFemale,
       aliases: [],
     }
     saveCustomExercise(exercise)
-    onCreated?.(exercise)
+    onCreated?.({
+      name: exercise.name,
+      modality: exercise.modality,
+      sets: exercise.defaultSets,
+      reps: exercise.defaultReps,
+      weightMale: exercise.defaultWeightMale,
+      weightFemale: exercise.defaultWeightFemale,
+    })
     setName('')
     setModality('G')
     setDefaultReps(10)
     setDefaultSets(3)
-    setDefaultWeight('BW')
+    setDefaultWeightMale('BW')
+    setDefaultWeightFemale('BW')
     onClose()
   }
 
@@ -87,14 +98,27 @@ export default function CustomExerciseModal({ isOpen, onClose, onCreated }) {
               className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white outline-none focus:border-accent/50"
             />
           </div>
+        </div>
+
+        <div className="flex gap-3">
           <div className="flex-1">
-            <label className="mb-1.5 block text-xs font-medium text-white/50">Weight</label>
+            <label className="mb-1.5 block text-xs font-medium text-white/50">Weight (Male)</label>
             <input
               type="text"
-              value={defaultWeight}
-              onChange={(e) => setDefaultWeight(e.target.value)}
+              value={defaultWeightMale}
+              onChange={(e) => setDefaultWeightMale(e.target.value)}
               className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white outline-none focus:border-accent/50"
-              placeholder="BW"
+              placeholder="60 kg"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="mb-1.5 block text-xs font-medium text-white/50">Weight (Female)</label>
+            <input
+              type="text"
+              value={defaultWeightFemale}
+              onChange={(e) => setDefaultWeightFemale(e.target.value)}
+              className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white outline-none focus:border-accent/50"
+              placeholder="40 kg"
             />
           </div>
         </div>
